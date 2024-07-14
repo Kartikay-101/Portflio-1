@@ -15,6 +15,7 @@
   <!--
     - custom css link
   -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
   <link rel="stylesheet" href="./assets/css/style.css">
 
   <!--
@@ -894,10 +895,6 @@
 
       </article>
 
-
-
-
-
       <!--
         - #CONTACT
       -->
@@ -920,23 +917,63 @@
 
           <h3 class="h3 form-title">Contact Form</h3>
 
-          <form action="post" class="form" data-form>
+          <form action="index.php" class="form" method="post" data-form>
 
             <div class="input-wrapper">
-              <input type="text" name="fullname" class="form-input" placeholder="Full name" required data-form-input>
+              <input type="text" name="fullname" class="form-input" placeholder="Full name:" required data-form-input>
 
-              <input type="email" name="email" class="form-input" placeholder="Email address" required data-form-input>
+              <input type="email" name="email" class="form-input" placeholder="Email address:" required data-form-input>
             </div>
 
-            <textarea name="message" class="form-input" placeholder="Your Message" required data-form-input></textarea>
+            <textarea name="message" class="form-input" placeholder="Your Message:" required data-form-input></textarea>
 
-            <button class="form-btn" type="submit" disabled data-form-btn>
+            <button class="form-btn" type="submit" name="submit"  data-form-btn>
               <ion-icon name="paper-plane"></ion-icon>
               <span>Send Message</span>
             </button>
 
           </form>
 
+                  <!-- PHP code for form submission -->
+    <?php
+        if (isset($_POST["submit"])) {
+            $fullName = $_POST["fullname"];
+            $email = $_POST["email"];
+            $message = $_POST["message"];
+
+            $errors = array();
+            
+            if (empty($fullName) || empty($email) || empty($message)) {
+                array_push($errors,"All fields are required");
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                array_push($errors,"Invalid email format");
+            }
+            if (strlen($message)<10) {
+                array_push($errors,"Message should be atleast 10 characters long");
+            }
+
+            if (count($errors)>0) {
+                foreach ($errors as  $error) {
+                    echo "<div class='alert alert-danger'>$error</div>";
+                }
+            }else{
+            require_once "database.php";
+            $sql = "INSERT INTO users (full_name, email, message) VALUES (?,?,?)";
+            $stmt = mysqli_stmt_init($conn);
+            $prepareStmt = mysqli_stmt_prepare($stmt,$sql);
+            if ($prepareStmt) {
+                mysqli_stmt_bind_param($stmt, "sss", $fullName, $email, $message);
+                mysqli_stmt_execute($stmt);
+                echo "<div class='alert alert-success' style='text-align: center; display: flex; justify-content: center; align-items: center; height: 10%; margin-top: 20px;'>Message submitted successfully!</div>";
+            }else{
+                die("Something went wrong");
+            }
+            }
+            }
+        ?>
+        <!-- PHP code for form submission -->
+          
         </section>
 
       </article>
@@ -944,7 +981,6 @@
     </div>
 
   </main>
-
 
 
 
